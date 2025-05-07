@@ -23,7 +23,7 @@ def write_initial(input, outfile, com_file, min_1H, max_1H, p0):
         outy.write(f" -ov -out {outfile}")
 
 
-def write_intermediate1(input, outfile, com_file, alt, neg):
+def write_intermediate1(input, outfile, com_file, alt, neg, yp0, yp1):
     with open(com_file, "w") as outy:
         outy.write("#!/bin/csh \n")
         outy.write(f"nmrPipe -in {input} \\\n")
@@ -38,7 +38,7 @@ def write_intermediate1(input, outfile, com_file, alt, neg):
             outy.write("| nmrPipe  -fn FT -alt -neg  \\\n")
         else:
             outy.write("| nmrPipe  -fn FT -auto  \\\n")
-        outy.write("| nmrPipe  -fn PS -p0 0.00 -p1 0.00 -di -verb \\\n")
+        outy.write(f"| nmrPipe  -fn PS -p0 {yp0} -p1 {yp1} -di -verb \\\n")
         outy.write(f" -ov -out {outfile}")
 
 
@@ -54,7 +54,7 @@ def write_intermediate2(input, outfile, com_file):
         outy.write(f"-ov -out {outfile}")
 
 
-def write_final(input, outfile, com_file):
+def write_final(input, outfile, com_file, blc=False):
     with open(com_file, "w") as outy:
         outy.write("#!/bin/csh \n")
         outy.write(f"nmrPipe -in {input} \\\n")
@@ -62,7 +62,11 @@ def write_final(input, outfile, com_file):
         outy.write("| nmrPipe  -fn SP -off 0.42 -end 0.98  -pow 2 -c 0.5    \\\n")
         outy.write("| nmrPipe  -fn FT -auto      \\\n")
         outy.write("| nmrPipe  -fn PS -p0 0.00 -p1 0.00 -di -verb         \\\n")
+        if blc:
+            outy.write("| nmrPipe -fn POLY -auto -ord 2 \\\n")
         outy.write("| nmrPipe -fn TP       \\\n")
+        if blc:
+            outy.write("| nmrPipe -fn POLY -auto -ord 2 \\\n")
         outy.write(f" -ov -out {outfile}")
 
 
@@ -75,6 +79,9 @@ def run_net(
     p0=0.0,
     alt=False,
     neg=False,
+    yp0=0.0,
+    yp1=0.0,
+    blc=False,
 ):
     if not os.path.exists(outfolder):
         os.mkdir(outfolder)
@@ -98,6 +105,8 @@ def run_net(
         os.path.join(outfolder, "int2.com"),
         alt,
         neg,
+        yp0,
+        yp1,
     )
     os.system(f'/bin/csh {os.path.join(outfolder,"int2.com")}')
     write_intermediate2(
@@ -115,5 +124,6 @@ def run_net(
         os.path.join(outfolder, "int5.ft1"),
         os.path.join(outfolder, outfile),
         os.path.join(outfolder, "fin.com"),
+        blc,
     )
     os.system(f'/bin/csh {os.path.join(outfolder,"fin.com")}')

@@ -132,6 +132,8 @@ def methyl(
     yp0: float = typer.Option(default=0.0, help="13C phase correction"),
     yp1: float = typer.Option(default=0.0, help="13C phase correction"),
     blc: bool = typer.Option(default=False, help="NMRPipe baseline correction in 13C"),
+    yZF: int = typer.Option(default=1, help="Zero filling factor for 13C dimension"),
+    xZF: int = typer.Option(default=1, help="Zero filling factor for 1H dimension"),
 ):
     """FID-Net Decouple and improve resolution
     of spectra for uniformly 13C-1H labelled
@@ -154,6 +156,8 @@ def methyl(
         yp0=yp0,
         yp1=yp1,
         blc=blc,
+        yZF=yZF,
+        xZF=xZF,
     )
 
 
